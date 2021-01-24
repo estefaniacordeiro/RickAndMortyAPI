@@ -11,7 +11,7 @@
 }
 body {
     width: 100%;
-    height: 100vh;
+    height: 100%;
     background-color: var(--background-color);
     color: white;
 }
@@ -33,7 +33,7 @@ body {
 }
 .sectionContent {
     border: 1px solid red;
-    height: 100%;
+    height: 80%;
     width: 100%;
     display: flex;
     flex-direction: row;
@@ -41,23 +41,53 @@ body {
 .sectionContent-sidebar {
     border: 2px solid yellow;
     display: none;
+    width: 15%;
     flex-direction: column;
-    padding: 30px 30px;
+    padding: 50px 20px 30px 30px;
+}
+.sectionContent-sidebar-listEpisodes {
+    height: 90%;
+    overflow: hidden;
+    overflow-y: scroll;
+}
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 5px;
+}
+::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 5px var(--first-color);
+}
+::-webkit-scrollbar-thumb {
+    background: var(--second-color);
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--second-color);
 }
 .sectionContent-sidebar > ul > li {
-    padding-bottom: 20px;
+    padding-bottom: 40px;
 }
-.sectionContent-sidebar-btnLoadEpisodes {
+.btn-episode {
     background-color: var(--background-color);
-    color:white;
+    border: none;
+    color: white;
     cursor: pointer;
-    padding: 5px 0;
+    font-size: 16px;
+    align-self: center;
+}
+.btn-episode:focus {
+    outline: none;
 }
 .sectionContent-sidebar-btnPages {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    padding: 10px 0;
+    height: 10%;
+}
+.sectionContent-sidebar-btnPages-back {
+    display: none;
+}
+.sectionContent-sidebar-btnPages-next {
+    margin: 0 auto;
 }
 .sectionContent-sidebar-btnPages-back,
 .sectionContent-sidebar-btnPages-next {
@@ -92,6 +122,7 @@ body {
 .footer {
     display: flex;
     justify-content: center;
-    padding: 10px 0 0 0;
+    padding: 20px 0;
     font-size: 12px;
+    border: 1px solid white;
 }
