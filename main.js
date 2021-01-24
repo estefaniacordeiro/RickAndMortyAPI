@@ -2,7 +2,7 @@
 
 loadHtml();
 
-$('.btn-activeSidebar-icon').on('click', showHideSidebar);
+$('.btn-activeSidebar-icon').on('click', showSidebar);
 
 function loadHtml() {
     $('body').append(
@@ -13,10 +13,7 @@ function loadHtml() {
         <section class="sectionContent">
             <section class="sectionContent-sidebar">
                 <ul class="sectionContent-sidebar-listEpisodes">
-                    <li>Episode 1</li>
-                    <li>Episode 2</li>
                 </ul>
-                <button class="sectionContent-sidebar-btnLoadEpisodes">Load episodes</button>
                 <section class="sectionContent-sidebar-btnPages">
                     <button class="sectionContent-sidebar-btnPages-back"><i class="fas fa-chevron-circle-left sectionContent-sidebar-btnPages-back-icon"></i></button>
                     <button class="sectionContent-sidebar-btnPages-next"><i class="fas fa-chevron-circle-right sectionContent-sidebar-btnPages-back-icon"></i></button>
@@ -31,12 +28,27 @@ function loadHtml() {
     );
 }
 
-function showHideSidebar() {
+function showSidebar() {
+    requestAPI();
+
     $('.sectionContent-sidebar').toggle(function() {
         $('sectionContent-main').css('left', 0);
     }, function() {
-        $('sectionContent-main').css('left', '200px');
+        $('sectionContent-main').css('left', '190px');
     });
 }
 
-
+function requestAPI() {
+    axios.get('https://rickandmortyapi.com/api/episode').then((data) => {
+        console.log(data);
+        let page1Episodes = data.data.results;
+        console.log(page1Episodes);
+        page1Episodes.forEach(episode => {
+            $('.sectionContent-sidebar-listEpisodes').append(
+                `<li>
+                    <button class="btn-episode">Episode ${episode.id}</button>
+                </li>`);
+            console.log(episode);
+        });
+    });
+}
