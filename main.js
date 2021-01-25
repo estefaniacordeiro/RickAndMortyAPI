@@ -56,7 +56,9 @@ function loadHtml() {
             </section>
             <section class="sectionContent-main">
                 <section class="sectionContent-main-info"></section>
-                <section class="sectionContent-main-list"></section>
+                <section class="sectionContent-main-list">
+                    <section class="containerlistCharacter"></section>
+                </section>
             </section>
         </section>
         <footer class="footer">&copy; 2021 · Estefanía Cordeiro Brión</footer>`
@@ -109,18 +111,48 @@ function sidebarItems() {
 }
 
 function showInfoEpisode(event) {
-    /* console.log(episodes);
-    console.log(episodes[count-1]); */
-
     let infoEpisode = {};
     let numEpisodeClicked = parseInt(event.target.id);
+    $('.sectionContent-main-info')[0].innerHTML = '';
+    $('.containerlistCharacter')[0].innerHTML = '';
     $('.sectionContent-main').css('background-image', 'none');
+    $('.sectionContent-main-info').css('border', '1px solid var(--second-color)');
+    $('.sectionContent-main-list').css('border', '1px solid var(--second-color)');
 
     episodes[count-1].forEach(episode => {
         if(numEpisodeClicked === episode.id) {
             infoEpisode = episode;
         }
     })
-    console.log(infoEpisode);
 
+    $('.sectionContent-main-info').append(
+        `<h1>Episode ${infoEpisode.id}</h1>
+        <h2>${infoEpisode.name}</h2>
+        <time>Air date: ${infoEpisode.air_date}</time>
+        <p>Episode code: ${infoEpisode.episode}</p>
+        `);
+    $('.sectionContent-main-info').children().css('padding', '30px');
+    $('.sectionContent-main-info').children('h1').css('font-size', '30px');
+
+    getInfoCharacters(infoEpisode.characters);
+}
+
+function getInfoCharacters(urlCharacters) {
+    urlCharacters.forEach(urlCharacter => {
+        axios.get(urlCharacter).then((res) => {
+            let infoCharacter = res.data;
+
+            $('.containerlistCharacter').append(
+                `<section class="sectionContent-main-list-infoCharacter">
+                    <img src=${infoCharacter.image} alt=${infoCharacter.name}>
+                    <section class="sectionContent-main-list-infoCharacter-details">
+                        <h2 class="nameCharacter">${infoCharacter.name}</h2>
+                        <p>${infoCharacter.status}</p>
+                        <p>${infoCharacter.species}</p>
+                    </section>
+                </section>
+                `)
+            $('.sectionContent-main-list-infoCharacter-details').children().css('padding', '10px');
+        })
+    })
 }
