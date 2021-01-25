@@ -1,10 +1,43 @@
 'use strict';
 
-loadHtml();
+let count = 1;
+let episodes = [];
+let nextPage = '';
+let prevPage = '';
+let showEpisodes = [];
 
-$('.btn-activeSidebar-icon').on('click', showSidebar);
+/* $('.title').on('click', function() {
+    console.log('hola');
+});
+ */
+$(document).ready(function() {
+    loadHtml();
 
-
+    $('.btn-activeSidebar-icon').on('click', showSidebar);
+    let btnNext = $('.sectionContent-sidebar-btnPages-next')[0];
+    let btnPrev = $('.sectionContent-sidebar-btnPages-back')[0];
+    $(btnNext).on('click', function() {
+        if(nextPage !== null) {
+            count++;
+            requestAPI(nextPage);
+        }
+        if(count > 1) {
+            btnPrev.classList.remove('hidden');
+        } else {
+            btnPrev.classList.add('hidden');
+        }
+    })
+    $(btnPrev).on('click', function() {
+        if(prevPage !== null) {
+            count--;
+            if(count === 1) {
+                btnPrev.classList.add('hidden');
+            }
+            requestAPI(prevPage);
+        }
+    })
+    $('.sectionContent-sidebar-listEpisodes').on('click', showInfoEpisode);
+})
 
 function loadHtml() {
     $('body').append(
@@ -17,13 +50,13 @@ function loadHtml() {
                 <ul class="sectionContent-sidebar-listEpisodes">
                 </ul>
                 <section class="sectionContent-sidebar-btnPages">
-                    <button class="sectionContent-sidebar-btnPages-back"><i class="fas fa-chevron-circle-left sectionContent-sidebar-btnPages-back-icon"></i></button>
+                    <button class="sectionContent-sidebar-btnPages-back hidden"><i class="fas fa-chevron-circle-left sectionContent-sidebar-btnPages-back-icon"></i></button>
                     <button class="sectionContent-sidebar-btnPages-next"><i class="fas fa-chevron-circle-right sectionContent-sidebar-btnPages-back-icon"></i></button>
                 </section>
             </section>
             <section class="sectionContent-main">
-                <section class="sectionContent-sidebar-info"></section>
-                <section class="sectionContent-sidebar-list"></section>
+                <section class="sectionContent-main-info"></section>
+                <section class="sectionContent-main-list"></section>
             </section>
         </section>
         <footer class="footer">&copy; 2021 · Estefanía Cordeiro Brión</footer>`
@@ -31,7 +64,8 @@ function loadHtml() {
 }
 
 function showSidebar() {
-    requestAPI();
+    const baseUrl = 'https://rickandmortyapi.com/api/episode';
+    requestAPI(baseUrl);
 
     $('.sectionContent-sidebar').toggle(function() {
         $('sectionContent-main').css('left', 0);
@@ -40,68 +74,53 @@ function showSidebar() {
     });
 }
 
-function requestAPI() {
-    /* Data of page 1 */
-    axios.get('https://rickandmortyapi.com/api/episode').then((dataPage1) => {
-        console.log(dataPage1);
-        let page1Episodes = dataPage1.data.results;
-        page1Episodes.forEach(episode => {
-            $('.sectionContent-sidebar-listEpisodes').append(
-                `<li>
-                    <button class="btn-episode">Episode ${episode.id}</button>
-                </li>`);
+function requestAPI(url) {
+    let totalPages = 0;
+    let btnNext = $('.sectionContent-sidebar-btnPages-next')[0];
+    if(episodes.length === 0 || episodes[count-1] === undefined) {
+        axios.get(url).then((res) => {
+            totalPages = res.data.info.pages;
+            episodes.push(res.data.results);
+            /* console.log(episodes); */
+            showEpisodes = episodes[count - 1];
+            nextPage = res.data.info.next;
+            prevPage = res.data.info.prev;
+            sidebarItems();
         });
-        /* Data of page 2 */
-        $('.sectionContent-sidebar-btnPages-next').on('click', () => {
-            if(dataPage1.data.info.prev === null) {
-                $('.sectionContent-sidebar-btnPages-back').show();
-            }
-            /* Return page 1 */
-            $('.sectionContent-sidebar-btnPages-back').on('click',() => {
-                console.log('como recupero la lista de capítulos de la página 1?')
-            })
-            /* Show the new episodes page 2*/
-            let nextUrl = dataPage1.data.info.next;
-            axios.get(nextUrl).then((dataPage2) => {
-                console.log(dataPage2);
-                $('.sectionContent-sidebar-listEpisodes')[0].textContent = '';
-                const page2Episodes = dataPage2.data.results;
-                page2Episodes.forEach(episode => {
-                    $('.sectionContent-sidebar-listEpisodes').append(
-                        `<li>
-                            <button class="btn-episode">Episode ${episode.id}</button>
-                        </li>`);
-                });
+    } else {
+        showEpisodes = episodes[count - 1];
+        sidebarItems();
+    }
+    if(count === totalPages) {
+        btnNext.classList.add('hidden');
+    } else {
+        btnNext.classList.remove('hidden');
+    }
+}
 
-                /* Data of page 3 */
-                $('.sectionContent-sidebar-btnPages-next').on('click', () => {
-                    /* Return page 2 */
-                    $('.sectionContent-sidebar-btnPages-back').on('click',() => {
-                        console.log('como recupero la lista de capítulos de la página 2?')
-                    })
-                    /* Show the new episodes page 3*/
-                    let nextUrl = dataPage2.data.info.next;
-                    axios.get(nextUrl).then((dataPage3) => {
-                        console.log(dataPage3);
-                        $('.sectionContent-sidebar-listEpisodes')[0].textContent = '';
-                        if(dataPage3.data.info.next === null) {
-                            $('.sectionContent-sidebar-btnPages-next').hide();
-                        }
-                        const page3Episodes = dataPage3.data.results;
-                        page3Episodes.forEach(episode => {
-                            $('.sectionContent-sidebar-listEpisodes').append(
-                                `<li>
-                                    <button class="btn-episode">Episode ${episode.id}</button>
-                                </li>`);
-                        });
-                    })
-                });
-            });
-        });
-    $('.btn-episode').on('click', showInfoEpisode);
+function sidebarItems() {
+    $('.sectionContent-sidebar-listEpisodes')[0].innerHTML = '';
+    showEpisodes.forEach(episode => {
+        $('.sectionContent-sidebar-listEpisodes').append(
+            `<li>
+                <button id=${episode.id} class="btn-episode">Episode ${episode.id}</button>
+            </li>`);
     });
 }
 
-function showInfoEpisode() {
+function showInfoEpisode(event) {
+    /* console.log(episodes);
+    console.log(episodes[count-1]); */
+
+    let infoEpisode = {};
+    let numEpisodeClicked = parseInt(event.target.id);
     $('.sectionContent-main').css('background-image', 'none');
+
+    episodes[count-1].forEach(episode => {
+        if(numEpisodeClicked === episode.id) {
+            infoEpisode = episode;
+        }
+    })
+    console.log(infoEpisode);
+
 }
