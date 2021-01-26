@@ -141,10 +141,12 @@ function printEpisodesItems(infoEpisode) {
 }
 
 function getInfoCharactersOfEpisode(urlCharacters) {
+    let arrayCharacters = [];
     let linkCharacters = urlCharacters;
     linkCharacters.forEach(linkCharacter => {
         axios.get(linkCharacter).then((res) => {
             let infoCharacter = res.data;
+            arrayCharacters.push(infoCharacter);
 
             printCharactersItemsEpisode(infoCharacter);
 
@@ -191,18 +193,24 @@ function showInfoCharacter(infoCharacter) {
     $('.sectionContent-main-info').children().css('padding', '10px');
     $('.sectionContent-main-info').children('h1').css('font-size', '30px');
     $('.imageCharacter').css('width', '60%');
+    $(`.location${infoCharacter.id}`).css('cursor', 'pointer');
 
     getInfoEpisodesOfCharacter(infoCharacter.episode);
+
+    $(`.location${infoCharacter.id}`).on('click', function () {
+        showInfoLocation(infoCharacter);
+    });
 }
 
 function printCharacterItem(infoCharacter) {
     $('.sectionContent-main-info').append(
-        `<img id="${infoCharacter.id}" class="imageCharacter" src=${infoCharacter.image} alt=${infoCharacter.name}>
-        <h1 id="${infoCharacter.id}">${infoCharacter.name}</h1>
+        `<img id=${infoCharacter.id} class=imageCharacter src=${infoCharacter.image} alt=${infoCharacter.name}>
+        <h1 id=${infoCharacter.id}>${infoCharacter.name}</h1>
         <p>Status: ${infoCharacter.status}</p>
         <p>Species: ${infoCharacter.species}</p>
         <p>Gender: ${infoCharacter.gender}</p>
-        <p>Origin: ${infoCharacter.origin.name}</p>
+        <p class=origin>Origin: ${infoCharacter.origin.name}</p>
+        <p class=location${infoCharacter.id}>Location: ${infoCharacter.location.name}</p>
         `);
 }
 
@@ -236,5 +244,72 @@ function printEpisodesItemsCharacter(infoEpisode) {
                 <p>${infoEpisode.episode}</p>
             </section>
         </section>
-        `)
+        `);
+}
+
+/* CONTENT MAIN FOR EACH LOCATION*/
+
+function showInfoLocation(infoCharacter) {
+    $(`.location${infoCharacter.id}`).off('click', showInfoLocation);
+    $('.sectionContent-main-info')[0].innerHTML = '';
+    $('.containerlist')[0].innerHTML = '';
+    axios.get(infoCharacter.location.url).then((res) => {
+        let infoLocation = res.data;
+
+        printLocationItem(infoLocation);
+
+        $('.sectionContent-main-info').children().css('padding', '10px');
+        $('.sectionContent-main-info').children('h1').css('font-size', '30px');
+
+        getResidentsOfLocation(infoLocation);
+    });
+}
+
+function printLocationItem(infoLocation) {
+    $('.sectionContent-main-info').append(
+        `<h1 id=${infoLocation.id}>${infoLocation.name}</h1>
+        <p>Status: ${infoLocation.type}</p>
+        <p>Species: ${infoLocation.dimension}</p>
+        `);
+}
+
+function getResidentsOfLocation(infoLocation) {
+    let arrayResidents = [];
+    $('.containerlist').prepend('<h1>Residents:</h1>')
+    infoLocation.residents.forEach(resident => {
+        axios.get(resident).then((res) => {
+            let infoResidents = res.data;
+            arrayResidents.push(infoResidents);
+
+            printLocationItemsCharacter(infoResidents);
+
+            $('.containerlist').children('h1').css({'font-size':'24px', 'padding-bottom':'20px'});
+            $('.sectionContent-main-list-infoSection-details').children().css('padding', '10px');
+            $(`.sectionContent-main-list-infoSection${infoResidents.id}`).css({
+                'display':'flex',
+                'flex-direction': 'row',
+                'padding-bottom': '30px'
+            });
+            $('.imageResident').css('width', '35%');
+            $('.imageResident').css('cursor', 'pointer');
+            $('.nameResident').css('cursor', 'pointer');
+
+            $(`.sectionContent-main-list-infoSection${infoResidents.id}`).on('click', function () {
+                showInfoCharacter(infoResidents);
+            });
+        });
+    });
+}
+
+function printLocationItemsCharacter(infoResidents) {
+    $('.containerlist').append(
+        `<section class=sectionContent-main-list-infoSection${infoResidents.id}>
+            <img class="imageResident" src=${infoResidents.image} alt=${infoResidents.name}>
+            <section class="sectionContent-main-list-infoSection-details">
+                <h2 class="nameResident">${infoResidents.name}</h2>
+                <p>${infoResidents.status}</p>
+                <p>${infoResidents.species}</p>
+            </section>
+        </section>
+        `);
 }
