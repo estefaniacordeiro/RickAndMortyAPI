@@ -6,10 +6,6 @@ let nextPage = '';
 let prevPage = '';
 let showEpisodes = [];
 
-/* $('.title').on('click', function() {
-    console.log('hola');
-});
- */
 $(document).ready(function() {
     loadHtml();
 
@@ -57,13 +53,15 @@ function loadHtml() {
             <section class="sectionContent-main">
                 <section class="sectionContent-main-info"></section>
                 <section class="sectionContent-main-list">
-                    <section class="containerlistCharacter"></section>
+                    <section class="containerlist"></section>
                 </section>
             </section>
         </section>
         <footer class="footer">&copy; 2021 · Estefanía Cordeiro Brión</footer>`
     );
 }
+
+/* CONTENT SIDEBAR */
 
 function showSidebar() {
     const baseUrl = 'https://rickandmortyapi.com/api/episode';
@@ -79,19 +77,19 @@ function showSidebar() {
 function requestAPI(url) {
     let totalPages = 0;
     let btnNext = $('.sectionContent-sidebar-btnPages-next')[0];
+
     if(episodes.length === 0 || episodes[count-1] === undefined) {
         axios.get(url).then((res) => {
             totalPages = res.data.info.pages;
             episodes.push(res.data.results);
-            /* console.log(episodes); */
             showEpisodes = episodes[count - 1];
             nextPage = res.data.info.next;
             prevPage = res.data.info.prev;
-            sidebarItems();
+            printSidebarItems();
         });
     } else {
         showEpisodes = episodes[count - 1];
-        sidebarItems();
+        printSidebarItems();
     }
     if(count === totalPages) {
         btnNext.classList.add('hidden');
@@ -100,7 +98,7 @@ function requestAPI(url) {
     }
 }
 
-function sidebarItems() {
+function printSidebarItems() {
     $('.sectionContent-sidebar-listEpisodes')[0].innerHTML = '';
     showEpisodes.forEach(episode => {
         $('.sectionContent-sidebar-listEpisodes').append(
@@ -110,49 +108,133 @@ function sidebarItems() {
     });
 }
 
+/* CONTENT MAIN FOR EACH EPISODE*/
+
 function showInfoEpisode(event) {
     let infoEpisode = {};
     let numEpisodeClicked = parseInt(event.target.id);
+    $('.nameCharacter').off('click', showInfoEpisode);
     $('.sectionContent-main-info')[0].innerHTML = '';
-    $('.containerlistCharacter')[0].innerHTML = '';
+    $('.containerlist')[0].innerHTML = '';
     $('.sectionContent-main').css('background-image', 'none');
-    $('.sectionContent-main-info').css('border', '1px solid var(--second-color)');
-    $('.sectionContent-main-list').css('border', '1px solid var(--second-color)');
 
     episodes[count-1].forEach(episode => {
         if(numEpisodeClicked === episode.id) {
             infoEpisode = episode;
         }
     })
+    printEpisodesItems(infoEpisode);
 
+    $('.sectionContent-main-info').children().css('padding', '30px');
+    $('.sectionContent-main-info').children('h1').css('font-size', '30px');
+
+    getInfoCharactersOfEpisode(infoEpisode.characters);
+}
+
+function printEpisodesItems(infoEpisode) {
     $('.sectionContent-main-info').append(
         `<h1>Episode ${infoEpisode.id}</h1>
         <h2>${infoEpisode.name}</h2>
         <time>Air date: ${infoEpisode.air_date}</time>
         <p>Episode code: ${infoEpisode.episode}</p>
         `);
-    $('.sectionContent-main-info').children().css('padding', '30px');
-    $('.sectionContent-main-info').children('h1').css('font-size', '30px');
-
-    getInfoCharacters(infoEpisode.characters);
 }
 
-function getInfoCharacters(urlCharacters) {
-    urlCharacters.forEach(urlCharacter => {
-        axios.get(urlCharacter).then((res) => {
+function getInfoCharactersOfEpisode(urlCharacters) {
+    let linkCharacters = urlCharacters;
+    linkCharacters.forEach(linkCharacter => {
+        axios.get(linkCharacter).then((res) => {
             let infoCharacter = res.data;
 
-            $('.containerlistCharacter').append(
-                `<section class="sectionContent-main-list-infoCharacter">
-                    <img src=${infoCharacter.image} alt=${infoCharacter.name}>
-                    <section class="sectionContent-main-list-infoCharacter-details">
-                        <h2 class="nameCharacter">${infoCharacter.name}</h2>
-                        <p>${infoCharacter.status}</p>
-                        <p>${infoCharacter.species}</p>
-                    </section>
-                </section>
-                `)
-            $('.sectionContent-main-list-infoCharacter-details').children().css('padding', '10px');
-        })
-    })
+            printCharactersItemsEpisode(infoCharacter);
+
+            $('.sectionContent-main-list-infoSection-details').children().css('padding', '10px');
+            $(`.sectionContent-main-list-infoSection${infoCharacter.id}`).css({
+                'display':'flex',
+                'flex-direction': 'row',
+                'padding-bottom': '30px'
+            });
+            $('.imageCharacter').css('cursor', 'pointer');
+            $('.nameCharacter').css('cursor','pointer');
+
+            $(`.sectionContent-main-list-infoSection${infoCharacter.id}`).on('click', function () {
+                showInfoCharacter(infoCharacter);
+            });
+        });
+    });
+}
+
+function printCharactersItemsEpisode(infoCharacter) {
+    $('.containerlist').append(
+        `<section class=sectionContent-main-list-infoSection${infoCharacter.id}>
+            <img class="imageCharacter" src=${infoCharacter.image} alt=${infoCharacter.name}>
+            <section class="sectionContent-main-list-infoSection-details">
+                <h2 class="nameCharacter">${infoCharacter.name}</h2>
+                <p>${infoCharacter.status}</p>
+                <p>${infoCharacter.species}</p>
+            </section>
+        </section>
+        `)
+}
+
+/* CONTENT MAIN FOR EACH CHARACTER*/
+
+function showInfoCharacter(infoCharacter) {
+    $(`.sectionContent-main-list-infoSection${infoCharacter.id}`).off('click', function () {
+        showInfoCharacter(infoCharacter);
+    });
+    $('.sectionContent-main-info')[0].innerHTML = '';
+    $('.containerlist')[0].innerHTML = '';
+
+    printCharacterItem(infoCharacter);
+
+    $('.sectionContent-main-info').children().css('padding', '10px');
+    $('.sectionContent-main-info').children('h1').css('font-size', '30px');
+    $('.imageCharacter').css('width', '60%');
+
+    getInfoEpisodesOfCharacter(infoCharacter.episode);
+}
+
+function printCharacterItem(infoCharacter) {
+    $('.sectionContent-main-info').append(
+        `<img id="${infoCharacter.id}" class="imageCharacter" src=${infoCharacter.image} alt=${infoCharacter.name}>
+        <h1 id="${infoCharacter.id}">${infoCharacter.name}</h1>
+        <p>Status: ${infoCharacter.status}</p>
+        <p>Species: ${infoCharacter.species}</p>
+        <p>Gender: ${infoCharacter.gender}</p>
+        <p>Origin: ${infoCharacter.origin.name}</p>
+        `);
+}
+
+function getInfoEpisodesOfCharacter(urlEpisodes) {
+    let linkEpisodes = urlEpisodes;
+    linkEpisodes.forEach(linkCharacter => {
+        axios.get(linkCharacter).then((res) => {
+            let infoEpisode = res.data;
+
+            printEpisodesItemsCharacter(infoEpisode);
+
+            $('.sectionContent-main-list-infoSection-details').children().css('padding', '10px');
+            $('.sectionContent-main-list-infoSection').css({
+                'display':'flex',
+                'flex-direction': 'row',
+                'padding-bottom': '30px'
+            });
+            $(`.nameCharacter${infoEpisode.id}`).css('cursor', 'pointer');
+
+            $(`.nameCharacter${infoEpisode.id}`).on('click', showInfoEpisode);
+        });
+    });
+}
+
+function printEpisodesItemsCharacter(infoEpisode) {
+    $('.containerlist').append(
+        `<section class="sectionContent-main-list-infoSection">
+            <h2 id=${infoEpisode.id} class=nameCharacter${infoEpisode.id}>Episode ${infoEpisode.id}</h2>
+            <section class="sectionContent-main-list-infoSection-details">
+                <p>${infoEpisode.name}</p>
+                <p>${infoEpisode.episode}</p>
+            </section>
+        </section>
+        `)
 }
