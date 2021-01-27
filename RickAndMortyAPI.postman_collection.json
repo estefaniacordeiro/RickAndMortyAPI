@@ -1,0 +1,30 @@
+{
+	"info": {
+		"_postman_id": "d61d4e73-cafe-41ba-a84e-773bad73946d",
+		"name": "RickAndMortyAPI",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "GET episodes_HATEOAS",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://rickandmortyapi.com/api/episode",
+					"protocol": "https",
+					"host": [
+						"rickandmortyapi",
+						"com"
+					],
+					"path": [
+						"api",
+						"episode"
+					]
+				},
+				"description": "In this API you will see the HATEOAS and pagination concept applied in its structure.\r\nThe main objective is to show the Rick and Morty episodes and navigate through the information it provides us."
+			},
+			"response": []
+		}
+	]
+}
